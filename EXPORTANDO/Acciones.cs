@@ -42,8 +42,11 @@ namespace EXPORTANDO
                         "Nombre", "Edad", "Carrera", "Matrícula", "Fecha"
                     };
 
-                    // Insertar los encabezados en la primera fila
-                    ws.Cell(1, 1).InsertData(encabezados);
+                    for (int i = 0; i < encabezados.Length; i++)
+                    {
+                        ws.Cell(1, i + 1).Value = encabezados[i];
+                   
+
 
                     // Aplicar formato a los encabezados
                     for (int i = 1; i <= encabezados.Length; i++)
