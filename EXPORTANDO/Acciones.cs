@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 
 namespace EXPORTANDO
 {
@@ -10,83 +12,116 @@ namespace EXPORTANDO
     {
         private List<Alumno> alumnoList = new List<Alumno>
         {
-            new Alumno("Ana", 20, "LADD", 25247, DateTime.Today),
-            new Alumno("Juan", 18, "ISC", 10007, DateTime.Today),
-            new Alumno("Jose", 20, "LDG", 20025, DateTime.Today),
-            new Alumno("Angela", 30, "IDM", 10250, DateTime.Today)
+           
         };
+
+        Correo correo = new Correo();
 
         public List<Alumno> MostrarAlumnos()
         {
-            return alumnoList;
+            try
+            {
+                return alumnoList;
+            }
+            catch (Exception ex)
+            {
+                correo.EnviarCorreo(ex.ToString());
+                throw;
+            }
         }
 
         public bool ExportarExcel()
         {
             try
             {
-                // Definir el nombre del archivo y la ruta en el escritorio
-                string nombreArchivo = "Listado.Alumnos.xlsx";
-                string rutaEscritorio = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                string rutaCompleta = Path.Combine(rutaEscritorio, nombreArchivo);
+                var rutaEscritorio = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var rutaArchivo = Path.Combine(rutaEscritorio, "Alumnos.xlsx");
 
-                // Crear un nuevo libro de trabajo
-                using (var wb = new XLWorkbook())
+                using (var workbook = new XLWorkbook())
                 {
-                    // Agregar una hoja de trabajo
-                    var ws = wb.AddWorksheet("Alumnos");
+                    var worksheet = workbook.Worksheets.Add("Alumnos");
 
-                    // Definir los encabezados de las columnas
-                    var encabezados = new[]
+                    // Encabezados
+                    worksheet.Cell(1, 0).Value = "Nombre";
+                    worksheet.Cell(1, 2).Value = "Edad";
+                    worksheet.Cell(1, 3).Value = "Carrera";
+                    worksheet.Cell(1, 4).Value = "Matricula";
+                    worksheet.Cell(1, 5).Value = "Fecha de Nacimiento";
+
+                    // Datos
+                    for (int i = 0; i < alumnoList.Count; i++)
                     {
-                        "Nombre", "Edad", "Carrera", "Matrícula", "Fecha"
-                    };
-
-                    for (int i = 0; i < encabezados.Length; i++)
-                    {
-                        ws.Cell(1, i + 1).Value = encabezados[i];
-                   
-
-
-                    // Aplicar formato a los encabezados
-                    for (int i = 1; i <= encabezados.Length; i++)
-                    {
-                        var cell = ws.Cell(1, i);
-                        cell.Style.Font.Bold = true;
-                        cell.Style.Fill.BackgroundColor = XLColor.LightGray;
-                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        var alumno = alumnoList[i];
+                        worksheet.Cell(i + 2, 1).Value = alumno.Nombre;
+                        worksheet.Cell(i + 2, 2).Value = alumno.Edad;
+                        worksheet.Cell(i + 2, 3).Value = alumno.Carrera;
+                        worksheet.Cell(i + 2, 4).Value = alumno.Matricula;
+                        worksheet.Cell(i + 2, 5).Value = alumno.Fechanacimiento.ToShortDateString();
                     }
 
-                    // Insertar los datos de los alumnos
-                    var datos = alumnoList.Select(a => new object[]
-                    {
-                        a.Nombre,
-                        a.Edad,
-                        a.Carrera,
-                        a.Matricula,
-                        a.Fechanacimiento.ToShortDateString()
-                    }).ToList();
-
-                    ws.Cell(2, 1).InsertData(datos);
-
-                    // Ajustar el tamaño de las columnas al contenido
-                    ws.Columns().AdjustToContents();
-
-                    // Guardar el archivo en la ruta especificada
-                    wb.SaveAs(rutaCompleta);
+                    workbook.SaveAs(rutaArchivo);
                 }
 
-                // Confirmar que el archivo se ha guardado correctamente
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Manejar cualquier error que ocurra durante el proceso
+                correo.EnviarCorreo(ex.ToString());
                 return false;
             }
         }
-    }
 
+      
+        public bool Importar()
+        {
+            try
+            {
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var filePath = Path.Combine(desktopPath, "Alumnos.xlsx");
+
+                if (!File.Exists(filePath))
+                {
+                    return false;
+                }
+
+                using (var workbook = new XLWorkbook(filePath))
+                {
+                    var worksheet = workbook.Worksheet("Alumnos");
+
+                    var rows = worksheet.RowsUsed().Skip(1); // Saltar los encabezados
+
+                    alumnoList.Clear(); // Limpiar la lista antes de importar nuevos datos
+
+                    foreach (var row in rows)
+                    {
+                        var nombre = row.Cell(1).Value.ToString();
+
+                        // Usar TryParse para evitar excepciones en la conversión
+                        int edad = 0;
+                        int.TryParse(row.Cell(2).Value.ToString(), out edad); // Intentar convertir a entero
+
+                        var carrera = row.Cell(3).Value.ToString();
+
+                        int matricula = 0;
+                        int.TryParse(row.Cell(4).Value.ToString(), out matricula); // Intentar convertir a entero
+
+                        DateTime fechaIngreso;
+                        DateTime.TryParse(row.Cell(5).Value.ToString(), out fechaIngreso); // Intentar convertir a DateTime
+
+                        // Agregar el Alumno solo si la conversión fue exitosa
+                        alumnoList.Add(new Alumno(nombre, edad, carrera, matricula, fechaIngreso));
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                correo.EnviarCorreo(ex.ToString());
+                return false;
+            }
+        }
+     
+    }
 }
 

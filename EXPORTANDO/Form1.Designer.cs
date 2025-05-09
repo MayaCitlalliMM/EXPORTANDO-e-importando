@@ -31,6 +31,7 @@
             this.tabladatos = new System.Windows.Forms.DataGridView();
             this.btnMostrar = new System.Windows.Forms.Button();
             this.btnExportar = new System.Windows.Forms.Button();
+            this.btnimportar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.tabladatos)).BeginInit();
             this.SuspendLayout();
             // 
@@ -64,11 +65,22 @@
             this.btnExportar.UseVisualStyleBackColor = true;
             this.btnExportar.Click += new System.EventHandler(this.btnExportar_Click);
             // 
+            // btnimportar
+            // 
+            this.btnimportar.Location = new System.Drawing.Point(454, 348);
+            this.btnimportar.Name = "btnimportar";
+            this.btnimportar.Size = new System.Drawing.Size(161, 32);
+            this.btnimportar.TabIndex = 3;
+            this.btnimportar.Text = "Importar";
+            this.btnimportar.UseVisualStyleBackColor = true;
+            this.btnimportar.Click += new System.EventHandler(this.btnimportar_Click_1);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1026, 450);
+            this.Controls.Add(this.btnimportar);
             this.Controls.Add(this.btnExportar);
             this.Controls.Add(this.btnMostrar);
             this.Controls.Add(this.tabladatos);
@@ -84,6 +96,7 @@
         private System.Windows.Forms.DataGridView tabladatos;
         private System.Windows.Forms.Button btnMostrar;
         private System.Windows.Forms.Button btnExportar;
+        private System.Windows.Forms.Button btnimportar;
     }
 }
 

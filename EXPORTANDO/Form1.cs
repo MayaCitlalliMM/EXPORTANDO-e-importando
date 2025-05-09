@@ -35,5 +35,30 @@ namespace EXPORTANDO
                 MessageBox.Show("Fallo el exportado...");
             }
         }
+
+        private void btnImportar_Click(object sender, EventArgs e)
+        {
+            if (acc.Importar())
+            {
+                MessageBox.Show("Importando...");
+            }
+            else
+            {
+                MessageBox.Show("Error...");
+            }
+        }
+
+        private void btnimportar_Click_1(object sender, EventArgs e)
+        {
+            if (acc.Importar())
+            {
+                MessageBox.Show("Importando...");
+            }
+            else
+            {
+                MessageBox.Show("Error...");
+            }
+
+        }
     }
 }
